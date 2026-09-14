@@ -40,9 +40,15 @@ npx tsx src/cli.ts https://your-domain.com/api/paid --deep --token <token>
 
 Start at 100. Failed checks deduct by severity (critical −40, high −25, medium −15; info never deducts). A ≥90, B ≥75, C ≥60, D ≥40, F <40. Non-x402 endpoints get N/A. A passive A means "no publicly observable misconfiguration" — not a security certification.
 
+## Verification standard
+
+Every claim this project publishes — a scan finding, an upstream issue, a report — is reproduced against the **published artifact at a recorded version**: the PyPI/npm wheel, the tagged release, or the deployed contract. Never a mirror, never an untracked checkout, never "latest main." Each finding states the exact artifact and version it was proven against.
+
+This rule was adopted after our first upstream report reproduced a genuine bug against a stale pre-transfer mirror — right bug, wrong environment. It is now the standing control.
+
 ## A note on AI assistance
 
-This codebase was developed with AI assistance (design and implementation), with human review and testing of every committed change. Disclosed per the norms of the x402 ecosystem's contribution policies.
+Design decisions, threat model, test cases, and every merged change are authored and reviewed by the maintainer. AI tooling was used during implementation as an assistant (code drafting, refactoring, documentation), consistent with the disclosure practices adopted by projects such as the Linux kernel ("Assisted-by:" trailers), Fedora, Electron, and ESLint.
 
 ## License
 
