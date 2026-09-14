@@ -36,6 +36,16 @@ npx tsx src/cli.ts https://your-domain.com/api/paid --challenge
 npx tsx src/cli.ts https://your-domain.com/api/paid --deep --token <token>
 ```
 
+### check-deps — x402 settle-gating dependency check
+
+Static scan of a Python dependency manifest (`requirements.txt` or `pyproject.toml`) for x402 pins in the settle-gating affected range (paid 3xx responses delivered without settlement — affected versions per [x402#3465](https://github.com/x402-foundation/x402/issues/3465); fixed in 2.15.0, [PR #2826](https://github.com/x402-foundation/x402/pull/2826)).
+
+```bash
+npx tsx src/cli.ts check-deps <requirements.txt|pyproject.toml> [--strict]
+```
+
+Exit codes map to severity: critical → 2, warning → 0 (1 with `--strict`), info → 0. A manifest-only v2 in-range pin is a conditional **warning** — affected ONLY if the service uses the Flask middleware (the v2 FastAPI middleware settled `< 400` from 2.0.0 and is never affected). `x402 == 1.0.0` is critical outright (both adapters).
+
 ## Grading
 
 Start at 100. Failed checks deduct by severity (critical −40, high −25, medium −15; info never deducts). A ≥90, B ≥75, C ≥60, D ≥40, F <40. Non-x402 endpoints get N/A. A passive A means "no publicly observable misconfiguration" — not a security certification.
