@@ -38,7 +38,7 @@ npx tsx src/cli.ts https://your-domain.com/api/paid --deep --token <token>
 
 ### check-deps — x402 settle-gating dependency check
 
-Static scan of a Python dependency manifest (`requirements.txt` or `pyproject.toml`) for x402 pins in the settle-gating affected range (paid 3xx responses delivered without settlement — affected versions per [x402#3465](https://github.com/x402-foundation/x402/issues/3465); fixed in 2.15.0, [PR #2826](https://github.com/x402-foundation/x402/pull/2826)).
+Static scan of a Python dependency manifest (`requirements.txt` or `pyproject.toml`) for x402 pins in the settle-gating affected range (paid 3xx responses delivered without settlement — affected versions per [x402#3465](https://github.com/x402-foundation/x402/issues/3465); widened at 2.11.0, [PR #2388](https://github.com/x402-foundation/x402/pull/2388) — correction 4 Oct 2026 (see [Ledger](https://github.com/TheDocter-dev/settle-ledger/tree/main/releases))).
 
 ```bash
 npx tsx src/cli.ts check-deps <requirements.txt|pyproject.toml> [--strict]

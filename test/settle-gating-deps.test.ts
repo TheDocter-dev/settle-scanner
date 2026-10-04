@@ -11,7 +11,7 @@ import {
 describe("parseVersion", () => {
   it("parses semver triples", () => {
     expect(parseVersion("1.0.0")).toEqual([1, 0, 0]);
-    expect(parseVersion("2.15.0")).toEqual([2, 15, 0]);
+    expect(parseVersion("2.11.0")).toEqual([2, 11, 0]);
     expect(parseVersion("2.10.0.post1")).toEqual([2, 10, 0]);
   });
   it("rejects junk", () => {
@@ -20,15 +20,15 @@ describe("parseVersion", () => {
   });
 });
 
-describe("checkX402PythonPin (wheel-verified boundary, 2026-09-14)", () => {
+describe("checkX402PythonPin (wheel-verified boundary, corrected 2026-10-04)", () => {
   it("flags v1 as critical (both adapters affected)", () => {
     const f = checkX402PythonPin("1.0.0");
     expect(f).not.toBeNull();
     expect(f!.severity).toBe("critical");
-    expect(f!.fixedIn).toBe("2.15.0");
+    expect(f!.fixedIn).toBe("2.11.0");
   });
-  it("flags v2 in-range as a Flask-conditional warning, not critical", () => {
-    for (const v of ["2.0.0", "2.10.0", "2.14.9"]) {
+  it("flags v2 in-range (>= 2.0.0, < 2.11.0) as a Flask-conditional warning, not critical", () => {
+    for (const v of ["2.0.0", "2.10.0", "2.10.9"]) {
       const f = checkX402PythonPin(v);
       expect(f).not.toBeNull();
       expect(f!.severity).toBe("warning");
@@ -36,7 +36,13 @@ describe("checkX402PythonPin (wheel-verified boundary, 2026-09-14)", () => {
       expect(f!.detail).toContain("FastAPI");
     }
   });
+  it("does NOT flag 2.11.0 through 2.14.x (v0.3 correction — previously over-flagged)", () => {
+    for (const v of ["2.11.0", "2.12.0", "2.13.0", "2.13.1", "2.14.0", "2.14.9"]) {
+      expect(checkX402PythonPin(v)).toBeNull();
+    }
+  });
   it("passes the fixed boundary and later", () => {
+    expect(checkX402PythonPin("2.11.0")).toBeNull();
     expect(checkX402PythonPin("2.15.0")).toBeNull();
     expect(checkX402PythonPin("2.16.1")).toBeNull();
     expect(checkX402PythonPin("3.0.0")).toBeNull();
@@ -87,7 +93,9 @@ describe("scanDependencyManifest", () => {
   it("catches pyproject-style pins", () => {
     expect(scanDependencyManifest('dependencies = ["fastapi>=0.110", "x402==2.10.0"]')).toHaveLength(1);
   });
-  it("ignores fixed versions and unrelated packages", () => {
+  it("catches in-range pins and ignores fixed versions", () => {
+    expect(scanDependencyManifest("x402==2.10.0\n")).toHaveLength(1);
+    expect(scanDependencyManifest("x402==2.11.0\nx402==2.14.0\n")).toHaveLength(0);
     expect(scanDependencyManifest("x402==2.15.0\nx402-fastapi==1.0.0\n")).toHaveLength(0);
   });
   it("does not double-report the same pin", () => {
@@ -96,8 +104,8 @@ describe("scanDependencyManifest", () => {
 });
 
 describe("exitCodeForFindings (severity maps to exit code, not presence)", () => {
-  const crit = checkX402PythonPin("1.0.0")!;          // critical
-  const warn = checkX402PythonPin("2.10.0")!;         // conditional warning
+  const crit = checkX402PythonPin("1.0.0")!;
+  const warn = checkX402PythonPin("2.10.0")!;
   const info = { ...warn, severity: "info" as const };
 
   it("critical finding exits 2", () => {
